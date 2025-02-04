@@ -1,3 +1,4 @@
+const { generateSalt, hashPassword, verifyPassword } = require('../helpers/Hashing.helper.js');
 const User = require('../models/User.model.js');
 
 // Get all users
@@ -10,10 +11,25 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+// Get a single user by email
+const getUserByEmail = async (req, res) => {
+  try {
+    const { email } = req.body
+    const user = await User.findOne({email});
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching user' });
+  }
+};
+
+
 // Get a single user by ID
 const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.email);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -26,8 +42,13 @@ const getUserById = async (req, res) => {
 // Create a new user
 const createUser = async (req, res) => {
   try {
-    const { name, email } = req.body;
-    const newUser = new User({ name, email });
+    const { username, email, password } = req.body;
+    const existingUsers = await User.find({email});
+    if (existingUsers.length > 0) {
+      return res.status(404).json({ message: 'User already exist' });
+    }
+    const hash_Password = await hashPassword(password)
+    const newUser = new User({ username, email, password: hash_Password });
     await newUser.save();
     res.status(201).json(newUser);
   } catch (err) {
@@ -44,11 +65,11 @@ const updateUser = async (req, res) => {
       { name, email },
       { new: true }
     );
-    
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     res.status(200).json(user);
   } catch (err) {
     res.status(400).json({ message: 'Error updating user', error: err.message });
@@ -70,6 +91,7 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
   getAllUsers,
+  getUserByEmail,
   getUserById,
   createUser,
   updateUser,

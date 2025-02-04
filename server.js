@@ -1,24 +1,21 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const userRoutes = require('./routes/User.routes.js');
+const authRoutes = require('./routes/Auth.routes.js');
 const server = express();
 const cors = require("cors");
-require('dotenv').config();
 const path = require('path');
-main().catch((err) => console.error("hihi", err));
+const { connectDB } = require("./config/db.conf.js");
+connectDB().catch((err) => console.error("db", err));
 
 server.use(express.json());
 // server.use(express.static(path.resolve(__dirname, 'build')))
 // server.use(express.static("public"));
 
 
-async function main() {
-  await mongoose.connect(process.env.DATABASE_URL);
-  console.log("MongoDB connected");
-}
 server.use(cors());
 
 server.use('/users', userRoutes);
+server.use('/auth', authRoutes);
 
 server.get('/', (req, res) =>
   res.json({"success": true})
