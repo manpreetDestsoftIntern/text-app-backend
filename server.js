@@ -1,28 +1,62 @@
 const express = require("express");
 const userRoutes = require('./routes/User.routes.js');
 const authRoutes = require('./routes/Auth.routes.js');
-const server = express();
+
+// const server = express();
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
+
 const cors = require("cors");
 const path = require('path');
+const { Server } = require("socket.io");
+// const io = new Server(server, {
+//   cors: {
+//       origin: "*", // Allow all origins (Change this in production)
+//       methods: ["GET", "POST"]
+//   }
+// });
+
+const io = new Server(server, {
+  cors: {
+      origin: ['http://localhost:5173']
+  }
+})
 const { connectDB } = require("./config/db.conf.js");
-connectDB().catch((err) => console.error("db", err));
+// connectDB().catch((err) => console.error("db", err));
 
-server.use(express.json());
-// server.use(express.static(path.resolve(__dirname, 'build')))
-// server.use(express.static("public"));
+app.use(express.json());
+// app.use(express.static(path.resolve(__dirname, 'build')))
+// app.use(express.static("public"));
 
 
-server.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+})); 
 
-server.use('/users', userRoutes);
-server.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+// app.use('/auth', authRoutes);
+// app.use(express.static(path.join(__dirname + '/views/index.html')));
 
-server.get('/', (req, res) =>
-  res.json({"success": true})
-);
 
-server.listen(3000, () => {
-  console.log("server started");
+// Serve static files from the current directory
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html'); // Ensure index.html exists
+});
+
+// Handle WebSocket connection
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  socket.on('disconnect', () => {
+      console.log('A user disconnected');
+  });
+});
+
+
+app.listen(3000, () => {
+  console.log("app started");
 });
 
 
@@ -38,41 +72,3 @@ server.listen(3000, () => {
 
 
 
-
-
-
-// const express = require('express');
-// const mongoose = require('mongoose');
-// const bodyParser = require('body-parser');
-// const userRoutes = require('./routes/User.routes.js');
-// require('dotenv').config(); // Load environment variables
-
-
-// const app = express();
-// const port = 3000;
-
-// // Middleware to parse JSON bodies
-// app.use(bodyParser.json());
-
-// // MongoDB connection
-// mongoose.connect(process.env.DATABASE_URL, {
-//   // useNewUrlParser: true,
-//   // useUnifiedTopology: true
-// })
-//   .then(() => {
-//     console.log('Connected to MongoDB');
-//   })
-//   .catch((err) => {
-//     console.error('MongoDB connection error:', err);
-//   });
-
-// // Routes
-// app.use('/users', userRoutes);
-
-// app.get('/', (req, res) => {
-//   res.send('Welcome to the User API');
-// });
-
-// app.listen(port, () => {
-//   console.log(`Server is running on port ${port}`);
-// });
