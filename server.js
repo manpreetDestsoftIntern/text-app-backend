@@ -10,53 +10,57 @@ const server = http.createServer(app);
 const cors = require("cors");
 const path = require('path');
 const { Server } = require("socket.io");
-// const io = new Server(server, {
-//   cors: {
-//       origin: "*", // Allow all origins (Change this in production)
-//       methods: ["GET", "POST"]
-//   }
-// });
-
 const io = new Server(server, {
   cors: {
-      origin: ['http://localhost:5173']
+      origin: "*", // Allow all origins (Change this in production)
+      // origin: 'http://localhost:3000', 
+      methods: ['GET', 'POST'],
   }
-})
+});
+
 const { connectDB } = require("./config/db.conf.js");
 // connectDB().catch((err) => console.error("db", err));
 
 app.use(express.json());
-// app.use(express.static(path.resolve(__dirname, 'build')))
-// app.use(express.static("public"));
 
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: "*", // Allow all origins (Change this in production)
 })); 
 
 app.use('/users', userRoutes);
 // app.use('/auth', authRoutes);
-// app.use(express.static(path.join(__dirname + '/views/index.html')));
-
-
-// Serve static files from the current directory
-app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html'); // Ensure index.html exists
+    res.json({success: true}); // Ensure index.html exists
 });
 
 // Handle WebSocket connection
 io.on('connection', (socket) => {
-  console.log('A user connected');
+  console.log('A user connected:', socket.id);
+
+  // Listen for username setup
+  socket.on('set_username', (username) => {
+    socket.username = username;
+    console.log(`${username} has joined the chat.`);
+  });
+
+  // Listen for chat messages
+  socket.on('send_message', (data) => {
+    const messageData = { username: socket.username, message: data.message };
+    console.log('Message received:', messageData);
+    socket.broadcast.emit('receive_message', messageData);
+  });
+
+  // Handle disconnection
   socket.on('disconnect', () => {
-      console.log('A user disconnected');
+    console.log(`${socket.username || 'A user'} disconnected.`);
   });
 });
 
 
-app.listen(3000, () => {
-  console.log("app started");
+server.listen(5001, () => {
+  console.log("server started");
 });
 
 
