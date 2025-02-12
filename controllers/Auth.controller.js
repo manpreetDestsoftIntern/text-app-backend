@@ -1,5 +1,5 @@
 const { generateSalt, hashPassword, verifyPassword } = require('../helpers/Hashing.helper.js');
-const User = require('../models/User.model.js');
+const { User } = require('../models/User.model.js');
 
 
 // Login User
@@ -19,7 +19,7 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
-    res.status(200).json({ message: 'Login successful' });
+    res.status(200).json({ findUser ,message: 'Login successful' });
   } catch (err) {
     res.status(500).json({ message: 'Error logging in', error: err.message });
   }

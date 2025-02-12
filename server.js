@@ -17,19 +17,23 @@ const io = new Server(server, {
       methods: ['GET', 'POST'],
   }
 });
-
 const { connectDB } = require("./config/db.conf.js");
-// connectDB().catch((err) => console.error("db", err));
+const { default: messageRoutes } = require("./routes/message.route.js");
+connectDB().catch((err) => console.error("db", err));
 
 app.use(express.json());
 
 
-app.use(cors({
-  origin: "*", // Allow all origins (Change this in production)
-})); 
+const corsOptions = {
+  origin: 'http://localhost:3000', // Your front-end URL
+  credentials: true,               // Allow credentials (cookies, HTTP authentication)
+};
 
-app.use('/users', userRoutes);
-// app.use('/auth', authRoutes);
+app.use(cors(corsOptions));
+
+app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
+app.use("/api/message", messageRoutes);
 
 app.get('/', (req, res) => {
     res.json({success: true}); // Ensure index.html exists

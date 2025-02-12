@@ -1,4 +1,4 @@
-const { generateSalt, hashPassword, verifyPassword } = require('../helpers/Hashing.helper.js');
+const { hashPassword } = require('../helpers/Hashing.helper.js');
 const User = require('../models/User.model.js');
 
 // Get all users
@@ -43,6 +43,7 @@ const getUserById = async (req, res) => {
 const createUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    console.log(username, email, password, ", email, password")
     const existingUsers = await User.find({email});
     if (existingUsers.length > 0) {
       return res.status(404).json({ message: 'User already exist' });
@@ -59,9 +60,9 @@ const createUser = async (req, res) => {
 // Update an existing user
 const updateUser = async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, id } = req.body;
     const user = await User.findByIdAndUpdate(
-      req.params.id,
+      id,
       { name, email },
       { new: true }
     );

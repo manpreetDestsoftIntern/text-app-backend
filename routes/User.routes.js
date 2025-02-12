@@ -12,10 +12,10 @@ router.get('/:id', userController.getUserById);
 router.put('/email', userController.getUserByEmail);
 
 // Create a new user
-router.post('/', userController.createUser);
+router.post('/signup', userController.createUser);
 
 // Update an existing user
-router.put('/:id', userController.updateUser);
+router.put('/update-profile', userController.updateUser);
 
 // Delete a user
 router.delete('/:id', userController.deleteUser);
