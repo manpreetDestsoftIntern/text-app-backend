@@ -18,8 +18,8 @@ const io = new Server(server, {
   }
 });
 const { connectDB } = require("./config/db.conf.js");
-const { default: messageRoutes } = require("./routes/message.route.js");
-connectDB().catch((err) => console.error("db", err));
+const { default: messageRoutes } = require("./routes/message.route.mjs");
+connectDB().catch((err) => console.error("Database Error: ", err));
 
 app.use(express.json());
 
@@ -66,17 +66,3 @@ io.on('connection', (socket) => {
 server.listen(5001, () => {
   console.log("server started");
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-

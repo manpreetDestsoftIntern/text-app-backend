@@ -50,8 +50,10 @@ const createUser = async (req, res) => {
     }
     const hash_Password = await hashPassword(password)
     const newUser = new User({ username, email, password: hash_Password });
-    await newUser.save();
-    res.status(201).json(newUser);
+    const dbResponse = await newUser.save();
+    console.log(dbResponse, dbResponse.id, dbResponse.email)
+    const token = createToken(findUser)
+    res.status(201).json({ dbResponse, token, message: 'Registration successful' });
   } catch (err) {
     res.status(400).json({ message: 'Error creating user', error: err.message });
   }
@@ -89,6 +91,20 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Error deleting user', error: err.message });
   }
 };
+
+// Function to create a JWT token
+function createToken(user) {
+  // Sample payload (you can add more fields as needed)
+  const payload = {
+    id: user.id,
+    username: user.username,
+    email: user.email
+  };
+
+  // Create the token (expires in 1 hour)
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+  return token;
+}
 
 module.exports = {
   getAllUsers,
